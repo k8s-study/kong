@@ -1,13 +1,7 @@
-import os
+from tasks.core.models import Config
 
-from collections import namedtuple
-
-Config = namedtuple('Config', [
-    'kong_admin_url'
-])
 
 config = Config(
-    kong_admin_url='http://localhost:8001'
+    kong_admin_url='http://localhost:8001',
+    apidoc_url='https://getkong.org/docs/0.12.x/admin-api'
 )
-
-

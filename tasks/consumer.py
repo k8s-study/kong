@@ -1,29 +1,29 @@
-from invoke import task
 import requests
 
-from tasks.config import config
+from tasks.core.models import MethodSpec
+from tasks import config
 
 
-@task
-def get(ctx, name=''):
-    response = requests.get(
-        f'{config.kong_admin_url}/consumers/{name}')
+ENDPOINT = '/consumers/{0}'  # 0: username or id
 
-    print(response.content.decode())
+METHODS = {
+    'list': MethodSpec(
+        method=requests.get, endpoint_params=(),
+        request_data_params={},
+        doc_url=f'{config.apidoc_url}/#list-consumers'),
 
+    'retrieve': MethodSpec(
+        method=requests.get, endpoint_params=('name', ),
+        request_data_params={},
+        doc_url=f'{config.apidoc_url}/#retrieve-consumer'),
 
-@task
-def create(ctx, name=''):
-    response = requests.post(
-        f'{config.kong_admin_url}/consumers/',
-        data={'username': name})
+    'create': MethodSpec(
+        method=requests.post, endpoint_params=(),
+        request_data_params={'data': ''},
+        doc_url=f'{config.apidoc_url}/#create-consumer'),
 
-    print(response.content.decode())
-
-
-@task
-def delete(ctx, name=''):
-    response = requests.delete(
-        f'{config.kong_admin_url}/consumers/{name}')
-
-    print(response.content.decode())
+    'delete': MethodSpec(
+        method=requests.delete, endpoint_params=('name', ),
+        request_data_params={},
+        doc_url=f'{config.apidoc_url}/#delete-consumer'),
+}
