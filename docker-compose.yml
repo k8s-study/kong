@@ -7,9 +7,13 @@ services:
       POSTGRES_USER: kong
       POSTGRES_PASSWORD: kong_password
       POSTGRES_DB: kong
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data:z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 3s
+      timeout: 30s
+      interval: 30s
+      retries: 3
 
   kong-data-migration:
     image: kong:latest
@@ -40,6 +44,7 @@ services:
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
       KONG_ADMIN_LISTEN_SSL: 0.0.0.0:8444
+    restart: on-failure
     links:
       - kong-database
     ports:
@@ -50,6 +55,8 @@ services:
     depends_on:
       kong-database:
         condition: service_healthy
+      kong-data-migration:
+        condition: service_started
 
   kong-konga-dashboard:
     image: pantsel/konga
