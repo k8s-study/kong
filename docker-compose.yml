@@ -67,9 +67,9 @@ services:
     ports:
       - 1337:1337
 
-  api-hello:
+  test-api:
     build:
-      context: api_hello
+      context: test-api
     command: python app.py
     ports:
       - 8081:8080
