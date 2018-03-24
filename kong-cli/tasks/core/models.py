@@ -6,5 +6,5 @@ MethodSpec = namedtuple('MethodSpec', (
 ))
 
 Config = namedtuple('Config', [
-    'kong_admin_url', 'apidoc_url'
+    'kong_admin_url', 'apidoc_url', 'suites_root', 'components'
 ])

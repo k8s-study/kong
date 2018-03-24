@@ -7,11 +7,10 @@ from tasks.config import config
 from tasks.core.context import Context
 
 
-root = 'tasks'
-component_name = 'consumer'
-
 ctxt = Context()
-ctxt.load(root, component_name)
+
+for component in config.components:
+    ctxt.load(config.suites_root, component)
 
 
 @task
