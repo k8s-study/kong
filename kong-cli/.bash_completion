@@ -4,4 +4,4 @@ _complete_invoke() {
     COMPREPLY=( $(compgen -W "${candidates}" -- $2) )
 }
 
-complete -F _complete_invoke -o default invoke inv 
+complete -F _complete_invoke -o default invoke inv
