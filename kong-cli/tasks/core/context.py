@@ -5,7 +5,6 @@ from invoke import task
 from tasks.core.api import ApiCallTask
 from tasks.core.proxy_definition import ProxyDefinition
 
-
 CTX_NS_PROXY_STORE_NAME = '__proxy_store'
 INVOKE_CTX_ARG_NAME = 'ctx'
 
@@ -24,6 +23,7 @@ class Context(object):
 
         endpoint = getattr(task_module, 'ENDPOINT')
         methods = getattr(task_module, 'METHODS')
+        arg_help = getattr(task_module, 'ARGUMENT_HELP', {})
 
         for method, spec in methods.items():
             invoke_task_name = f'{component_name}-{method}'
@@ -44,7 +44,8 @@ class Context(object):
 
             # execute define proxy function and bind to invoke task's body.
             exec(proxy_fn.as_string, self._namespace)
-            invoke_task = task(self._namespace[origin_fn_name])
+            invoke_task = task(
+                self._namespace[origin_fn_name], help=arg_help)
 
             # set proxy function signature as task.body.
             invoke_task.body = self._namespace[proxy_fn_name]

@@ -42,14 +42,13 @@ Usage: inv[oke] [--core-opts] consumer-create [--options] [other tasks here ...]
 Docstring:
   https://getkong.org/docs/0.12.x/admin-api/#create-consumer
 
-Options:
-  -d STRING, --data=STRING
+  Options:
+    -d STRING, --data=STRING   json string(e.g '{"username": "john.doe"}') or json payload file path (e.g @payload.json)
 
 # consumer-create로 kong consumer 생성하기
 (kong-cli) $ inv consumer-create -d '{"username": "testuser"}'
 
-# or
-
+# 또는 payload.json를 링크
 (kong-cli) $ inv consumer-create -d @payload.json
 ```
 

@@ -1,14 +1,6 @@
 import json
 
 
-DATA_PARAM_HELP = {
-    'data': (
-        'json string(e.g \'{"username": "john.doe"}\') '
-        'or json payload file path (e.g @payload.json)'
-    )
-}
-
-
 def get_payload(data_or_path):
     if data_or_path:
         if data_or_path.startswith('@'):

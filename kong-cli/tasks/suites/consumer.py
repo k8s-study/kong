@@ -6,6 +6,14 @@ from tasks import config
 
 ENDPOINT = '/consumers/{0}'  # 0: username or id
 
+ARGUMENT_HELP = {
+    'name': 'consumer username or id',
+    'data': (
+        'json string(e.g \'{"username": "john.doe"}\') '
+        'or json payload file path (e.g @payload.json)'
+    )
+}
+
 METHODS = {
     'list': MethodSpec(
         method=requests.get, endpoint_params=(),
