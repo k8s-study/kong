@@ -66,3 +66,10 @@ services:
       - kong
     ports:
       - 1337:1337
+
+  test-api:
+    build:
+      context: test-api
+    command: python app.py
+    ports:
+      - 8081:8080
