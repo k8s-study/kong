@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-database
+spec:
+  selector:
+    name: kong-database
+  ports:
+    - name: kong-database
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kong-database
+  labels:
+    name: kong-database
+spec:
+  hostname: kong-database
+  containers:
+    - name: kong-database-pg
+      image: postgres:9.4
+      env:
+        - name: POSTGRES_USER
+          value: kong
+        - name: POSTGRES_PASSWORD
+          value: kong_password
+        - name: POSTGRES_DB
+          value: kong
+      ports:
+        - name: kong-database
+          containerPort: 5432
+          protocol: TCP

@@ -16,7 +16,7 @@ services:
       retries: 3
 
   kong-data-migration:
-    image: kong:latest
+    image: kong:0.11
     links:
       - kong-database
     environment:
@@ -31,7 +31,7 @@ services:
         condition: service_healthy
 
   kong:
-    image: kong:latest
+    image: kong:0.11
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-database

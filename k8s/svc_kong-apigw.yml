@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-apigw
+spec:
+  selector:
+    name: kong-apigw
+  type: NodePort
+  ports:
+    - name: kong-http
+      port: 10080
+      targetPort: 8000
+
+    - name: kong-https
+      port: 10443
+      targetPort: 8443
+
+    - name: admin-http
+      port: 10081
+      targetPort: 8001
+
+    - name: admin-https
+      port: 10444
+      targetPort: 8444

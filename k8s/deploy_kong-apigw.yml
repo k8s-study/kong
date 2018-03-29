@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong-apigw
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: kong-apigw
+  template:
+    metadata:
+      labels:
+        name: kong-apigw
+    spec:
+      containers:
+        - name: kong-apigw
+          image: kong:0.11
+          env:
+            - name: KONG_DATABASE
+              value: postgres
+            - name: KONG_PG_HOST
+              value: kong-database
+            - name: KONG_PG_USERNAME
+              value: kong
+            - name: KONG_PG_PASSWORD
+              value: kong_password
+            - name: KONG_CASSANDRA_CONTACT_POINTS
+              value: kong-database
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: 0.0.0.0:8001
+            - name: KONG_ADMIN_LISTEN_SSL
+              value: 0.0.0.0:8444
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: https
+              containerPort: 8443
+            - name: admin-http
+              containerPort: 8001
+            - name: admin-https
+              containerPort: 8444

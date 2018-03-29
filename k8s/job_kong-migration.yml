@@ -1,0 +1,27 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kong-migration
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      name: kong-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kong-migration
+          image: kong:0.11
+          command: ["kong", "migrations", "up", "--vv"]
+          env:
+            - name: KONG_DATABASE
+              value: postgres
+            - name: KONG_PG_HOST
+              value: kong-database
+            - name: KONG_PG_USERNAME
+              value: kong
+            - name: KONG_PG_PASSWORD
+              value: kong_password
+            - name: KONG_CASSANDRA_CONTACT_POINTS
+              value: kong-database
