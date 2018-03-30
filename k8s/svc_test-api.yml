@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-api
+spec:
+  selector:
+    name: test-api
+  ports:
+    - name: http
+      port: 20080
+      targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      name: test-api
+  template:
+    metadata:
+      labels:
+        name: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: kong_test-api
+          imagePullPolicy: Never
+          command: ["python", "app.py"]
+          ports:
+            - name: http
+              containerPort: 8080

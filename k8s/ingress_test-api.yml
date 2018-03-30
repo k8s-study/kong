@@ -1,0 +1,16 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-test-api
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: testapi.pong.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: test-api
+              servicePort: 20080
