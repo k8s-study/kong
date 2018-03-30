@@ -132,9 +132,29 @@ $ pyenv activate kong-cli
 $ pip install -r requirements.txt
 ```
 
+### Usage
+
+#### Using bash source
+
+shell 환경에 `.bash_completion`을 매핑한다.
+
+``` sh
+. .bash_completion
+```
+
+kong 명령을 사용해 본다.
+
+``` sh
+(kong-cli) $ kong -l
+```
+
+#### Inside `kong-cli` src
+
 `inv -l` 명령어로 태스크를 확인
 
 ``` sh
+(kong-cli) $ cd kong-cli
+
 (kong-cli) $ inv -l
 Available tasks:
 

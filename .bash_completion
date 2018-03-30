@@ -1,0 +1,11 @@
+export KONG_ROOT=$(pwd)
+
+alias kong="$KONG_ROOT/kong"
+
+_complete_invoke() {
+    local candidates
+    candidates=`cd $KONG_ROOT/kong-cli; invoke --complete -- ${COMP_WORDS[*]}`
+    COMPREPLY=($(compgen -W "${candidates}" -- $2))
+}
+
+complete -F _complete_invoke -o default kong

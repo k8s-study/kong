@@ -1,3 +1,5 @@
+.env
+
 pgdata
 __pycache__
 .coverage
