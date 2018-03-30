@@ -69,47 +69,53 @@ $ kubectl create -f k8s/
 ``` sh
 $ kubectl get all
 NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deploy/kong-apigw   2         2         2            2           23m
+deploy/kong-apigw   2         2         2            2           7m
 
 NAME                      DESIRED   CURRENT   READY     AGE
-rs/kong-apigw-6b7d95b77   2         2         2         23m
+rs/kong-apigw-6b7d95b77   2         2         2         7m
 
 NAME                DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deploy/kong-apigw   2         2         2            2           23m
+deploy/kong-apigw   2         2         2            2           7m
 
 NAME                      DESIRED   CURRENT   READY     AGE
-rs/kong-apigw-6b7d95b77   2         2         2         23m
+rs/kong-apigw-6b7d95b77   2         2         2         7m
 
 NAME                  DESIRED   SUCCESSFUL   AGE
-jobs/kong-migration   1         1            23m
+jobs/kong-migration   1         1            7m
 
 NAME                            READY     STATUS    RESTARTS   AGE
-po/kong-apigw-6b7d95b77-db75h   1/1       Running   2          23m
-po/kong-apigw-6b7d95b77-wc6hd   1/1       Running   2          23m
-po/kong-database                1/1       Running   0          23m
+po/kong-apigw-6b7d95b77-9thkg   1/1       Running   2          7m
+po/kong-apigw-6b7d95b77-c2hx5   1/1       Running   2          7m
+po/kong-database                1/1       Running   0          7m
 
-NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                           AGE
-svc/kong-apigw      NodePort    10.102.85.184    <none>        10080:30792/TCP,10443:31423/TCP,10081:30411/TCP,10444:32227/TCP   23m
-svc/kong-database   ClusterIP   10.110.118.134   <none>        5432/TCP                                                          23m
-svc/kubernetes      ClusterIP   10.96.0.1        <none>        443/TCP                                                           5d
+NAME                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                                   AGE
+svc/kong-apigw      ClusterIP   10.111.20.29   <none>        10080/TCP,10443/TCP,10081/TCP,10444/TCP   7m
+svc/kong-database   ClusterIP   10.97.1.7      <none>        5432/TCP                                  7m
+svc/kubernetes      ClusterIP   10.96.0.1      <none>        443/TCP                                   6d
+```
+
+`Ingress`도 확인해 본다.
+
+``` sh
+$ kubectl get ing
+NAME                 HOSTS                                 ADDRESS          PORTS     AGE
+ingress-kong-apigw   apigw.pong.com,apigw-admin.pong.com   192.168.99.100   80        8m
 ```
 
 `minikube`로 클러스터 외부로 노출된 서비스를 확인해 본다.
 
 ``` sh
 $ minikube service list
-|-------------|----------------------|--------------------------------|
-|  NAMESPACE  |         NAME         |              URL               |
-|-------------|----------------------|--------------------------------|
-| default     | kong-apigw           | http://192.168.99.100:30792    |
-|             |                      | http://192.168.99.100:31423    |
-|             |                      | http://192.168.99.100:30411    |
-|             |                      | http://192.168.99.100:32227    |
-| default     | kong-database        | No node port                   |
-| default     | kubernetes           | No node port                   |
-| kube-system | kube-dns             | No node port                   |
-| kube-system | kubernetes-dashboard | http://192.168.99.100:30000    |
-|-------------|----------------------|--------------------------------|
+|-------------|----------------------|-----------------------------|
+|  NAMESPACE  |         NAME         |             URL             |
+|-------------|----------------------|-----------------------------|
+| default     | kong-apigw           | No node port                |
+| default     | kong-database        | No node port                |
+| default     | kubernetes           | No node port                |
+| kube-system | default-http-backend | http://192.168.99.100:30001 |
+| kube-system | kube-dns             | No node port                |
+| kube-system | kubernetes-dashboard | http://192.168.99.100:30000 |
+|-------------|----------------------|-----------------------------|
 ```
 
 ## invoke tasks
