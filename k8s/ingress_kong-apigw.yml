@@ -3,6 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: ingress-kong-apigw
+  namespace: kong-apigw
   annotations:
     ingress.kubernetes.io/ssl-redirect: "false"
 spec:

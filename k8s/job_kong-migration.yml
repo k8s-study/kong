@@ -3,11 +3,13 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: kong-migration
+  namespace: kong-apigw
 spec:
   backoffLimit: 5
   template:
     metadata:
       name: kong-migration
+      namespace: kong-apigw
     spec:
       restartPolicy: Never
       containers:
