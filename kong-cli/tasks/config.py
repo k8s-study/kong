@@ -7,6 +7,7 @@ config = Config(
     suites_root='tasks.suites',
     components=[
         'status',
+        'node',
         'consumer',
         'api'
     ]
