@@ -6,7 +6,6 @@ metadata:
 spec:
   selector:
     name: kong-apigw
-  type: NodePort
   ports:
     - name: kong-http
       port: 10080

@@ -1,0 +1,23 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-kong-apigw
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: apigw.pong.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kong-apigw
+              servicePort: 10080
+    - host: apigw-admin.pong.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kong-apigw
+              servicePort: 10081
