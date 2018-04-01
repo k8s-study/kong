@@ -29,7 +29,7 @@ class ProxyDefinition(object):
 
             # define proxy function which calls stored origin function
             f'def {self._name}({self._definition_arguments}):'
-            f'return {self._store_name}["{self._origin_fn_name}"]({self._passing_arguments})'
+            f'return {self._origin_fn_name}({self._passing_arguments})'
         )
 
         return exec_routine
