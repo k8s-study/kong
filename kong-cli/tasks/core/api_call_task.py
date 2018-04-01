@@ -13,10 +13,10 @@ class ApiCallTask(object):
 
     def __call__(self, *args, **kwargs):
         invoke_ctx, options = args[0], args[1:]
-
         options = ('', ) if not options else options
         api_url = self.full_api_url.format(*options)
 
         # send request to api
-        response = self._method(api_url, data=kwargs)
+        response = self._method(
+            url=api_url, headers={'Content-type': 'application/json'}, **kwargs)
         print(response.content.decode())
