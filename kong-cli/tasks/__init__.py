@@ -7,7 +7,7 @@ from tasks.config import config
 from tasks.core.context import Context
 
 
-ctxt = Context()
+ctxt = Context(config)
 
 for component in config.components:
     ctxt.load(config.suites_root, component)

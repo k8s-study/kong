@@ -2,7 +2,7 @@ import importlib
 
 from invoke import task
 
-from tasks.core.api import ApiCallTask
+from tasks.core.api_call_task import ApiCallTask
 from tasks.core.proxy_definition import ProxyDefinition
 
 CTX_NS_PROXY_STORE_NAME = '__proxy_store'
@@ -13,10 +13,15 @@ class Context(object):
     # invoke tasks
     tasks = []
 
+    _config = None
+
     # exec() namespace
     _namespace = {
         CTX_NS_PROXY_STORE_NAME: {}
     }
+
+    def __init__(self, config):
+        self._config = config
 
     def load(self, root, component_name):
         task_module = importlib.import_module(f'{root}.{component_name}')
@@ -31,6 +36,7 @@ class Context(object):
             proxy_fn_name = f'_proxy_{component_name}_{method}'
 
             self._namespace[origin_fn_name] = ApiCallTask(
+                kong_admin_url=self._config.kong_admin_url,
                 name=invoke_task_name, requests_method=spec.method,
                 doc=spec.doc_url, endpoint=endpoint,
                 endpoint_params=spec.endpoint_params)

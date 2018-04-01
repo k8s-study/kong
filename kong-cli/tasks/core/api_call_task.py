@@ -1,8 +1,6 @@
-from tasks.config import config
-
-
 class ApiCallTask(object):
-    def __init__(self, name, doc, endpoint, endpoint_params, requests_method):
+    def __init__(self, kong_admin_url, name, doc, endpoint, endpoint_params, requests_method):
+        self._kong_admin_url = kong_admin_url
         self.__name__ = name
         self.__doc__ = doc
         self._endpoint = endpoint
@@ -11,7 +9,7 @@ class ApiCallTask(object):
 
     @property
     def full_api_url(self):
-        return config.kong_admin_url + self._endpoint
+        return self._kong_admin_url + self._endpoint
 
     def __call__(self, *args, **kwargs):
         invoke_ctx, options = args[0], args[1:]
