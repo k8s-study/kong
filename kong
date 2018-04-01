@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd $KONG_ROOT/kong-cli
-inv $@
+inv "${@}"
