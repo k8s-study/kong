@@ -14,6 +14,19 @@ spec:
 
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kong-database-claim
+  namespace: kong-apigw
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: kong-database
@@ -36,3 +49,10 @@ spec:
         - name: kong-database
           containerPort: 5432
           protocol: TCP
+      volumeMounts:
+        - name: kong-database-volume
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: kong-database-volume
+      persistentVolumeClaim:
+        claimName: kong-database-claim
