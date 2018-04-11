@@ -28,7 +28,7 @@ class TestApiCallTask(unittest.TestCase):
             kong_admin_url=self.config.kong_admin_url,
             name='test_call_task',
             doc='call_task_documentation',
-            endpoint='/endpoint/{0}/test/{1}',
+            endpoint='/endpoint/{arg_a}/test/{arg_b}',
             endpoint_params=('arg_a', 'arg_b'),
             requests_method=self.session.get)
 
@@ -37,7 +37,7 @@ class TestApiCallTask(unittest.TestCase):
 
         self.assertEqual(
             task.full_api_url,
-            'mock://unittest.kong.com/endpoint/{0}/test/{1}')
+            'mock://unittest.kong.com/endpoint/{arg_a}/test/{arg_b}')
 
     def test_task_should_be_callable(self):
         task = self._create_call_task()

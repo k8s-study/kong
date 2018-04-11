@@ -9,6 +9,7 @@ config = Config(
         'status',
         'node',
         'consumer',
-        'api'
+        'api',
+        'api_plugin'
     ]
 )

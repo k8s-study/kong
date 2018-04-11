@@ -4,7 +4,7 @@ from tasks.core.models import MethodSpec
 from tasks import config
 
 
-ENDPOINT = '/consumers/{0}'  # 0: username or id
+ENDPOINT = '/consumers/{name}'  # 0: username or id
 
 ARGUMENT_HELP = {
     'name': 'consumer username or id',

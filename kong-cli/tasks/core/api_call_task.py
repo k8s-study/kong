@@ -1,3 +1,6 @@
+from collections import defaultdict
+
+
 class ApiCallTask(object):
     def __init__(self, kong_admin_url, name, doc, endpoint, endpoint_params, requests_method):
         self._kong_admin_url = kong_admin_url
@@ -13,8 +16,15 @@ class ApiCallTask(object):
 
     def __call__(self, *args, **kwargs):
         invoke_ctx, options = args[0], args[1:]
-        options = ('', ) if not options else options
-        api_url = self.full_api_url.format(*options)
+        options = ('' for _ in range(len(options))) if not options else options
+
+        endpoint_format_map = {
+            param_name: options[i]
+            for i, param_name in enumerate(self._endpoint_params)
+        }
+
+        api_url = self.full_api_url.format_map(
+            defaultdict(str, endpoint_format_map))
 
         # send request to api
         response = self._method(
