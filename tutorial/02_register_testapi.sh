@@ -28,7 +28,7 @@ echo '-- get api list'
 inv api-list | jq
 
 apigw_host=$(
-  kubectl get ing -n kong-apigw -o json | \
+  kubectl get ing -o json | \
   jq -r '.items[0].spec.rules[0].host')
 
 sleep 3

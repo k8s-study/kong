@@ -3,7 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kong-apigw
-  namespace: kong-apigw
 spec:
   replicas: 2
   selector:
@@ -11,7 +10,6 @@ spec:
       name: kong-apigw
   template:
     metadata:
-      namespace: kong-apigw
       labels:
         name: kong-apigw
     spec:
