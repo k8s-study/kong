@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-api
+spec:
+  rules:
+    - host: api.pongpong.io
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: test-api 
+              servicePort: 20080
+
