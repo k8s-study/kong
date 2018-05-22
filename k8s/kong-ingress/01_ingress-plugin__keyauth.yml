@@ -1,0 +1,21 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: key-auth-plugin
+---
+
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: anonymous-consumer
+username: anonymous
+---
+
+apiVersion: configuration.konghq.com/v1
+kind: KongCredential
+metadata:
+  name: anonymous-credential
+consumerRef: anonymous-consumer
+type: key-auth
+config:
+  key: anonymous
