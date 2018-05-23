@@ -281,7 +281,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - name: kong-admin
+  - name: http
     port: 8001
     targetPort: 8001
     protocol: TCP
@@ -312,8 +312,11 @@ spec:
         # the returned metrics are related to the kong ingress controller not kong itself
         prometheus.io/port: "10254"
         prometheus.io/scrape: "true"
+        sidecar.istio.io/status: '{"version":"43466efda2266e066fb5ad36f2d1658de02fc9411f6db00ccff561300a2a3c78","initContainers":["istio-init","enable-core-dump"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"]}'
+      creationTimestamp: null
       labels:
         app: ingress-kong
+        version: 0.13.1
     spec:
       serviceAccountName: kong-serviceaccount
       initContainers:
@@ -325,6 +328,40 @@ spec:
           - name: KONG_PG_HOST
             value: postgres
         command: [ "/bin/sh", "-c", "kong migrations up" ]
+        resources: {}
+      - args:
+        - -p
+        - "15001"
+        - -u
+        - "1337"
+        image: docker.io/istio/proxy_init:0.7.1
+        imagePullPolicy: IfNotPresent
+        name: istio-init
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+      - args:
+        - -c
+        - sysctl -w kernel.core_pattern=/etc/istio/proxy/core.%e.%p.%t && ulimit -c
+          unlimited
+        command:
+        - /bin/sh
+        image: alpine
+        imagePullPolicy: IfNotPresent
+        name: enable-core-dump
+        resources: {}
+        securityContext:
+          privileged: true
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: istio-envoy
+      - name: istio-certs
+        secret:
+          optional: true
+          secretName: istio.kong-serviceaccount
       containers:
       - name: admin-api
         image: kong:0.13.1-centos
@@ -340,29 +377,32 @@ spec:
           - name: KONG_ADMIN_LISTEN
             value: 0.0.0.0:8001
           - name: KONG_PROXY_LISTEN
-            value: 'off'
+            value: "off"
         ports:
         - name: kong-admin
           containerPort: 8001
         livenessProbe:
           failureThreshold: 3
-          httpGet:
-            path: /status
-            port: 8001
-            scheme: HTTP
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:8001/status
           initialDelaySeconds: 30
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         readinessProbe:
           failureThreshold: 3
-          httpGet:
-            path: /status
-            port: 8001
-            scheme: HTTP
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:8001/status
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
+        resources: {}
       - name: ingress-controller
         args:
         - /kong-ingress-controller
@@ -383,28 +423,85 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        image: kong-docker-kubernetes-ingress-controller.bintray.io/kong-ingress-controller:0.0.4
+        image: subicura/kong-ingress-controller-amd64:0.0.4.1
         imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-
+        # livenessProbe:
+        #   failureThreshold: 3
+        #   exec:
+        #     command:
+        #     - curl
+        #     - -f
+        #     - http://localhost:10254/healthz
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        #   successThreshold: 1
+        #   timeoutSeconds: 1
+        # readinessProbe:
+        #   failureThreshold: 3
+        #   exec:
+        #     command:
+        #     - curl
+        #     - -f
+        #     - http://localhost:10254/healthz
+        #   periodSeconds: 10
+        #   successThreshold: 1
+        #   timeoutSeconds: 1
+        resources: {}
+      - args:
+        - proxy
+        - sidecar
+        - --configPath
+        - /etc/istio/proxy
+        - --binaryPath
+        - /usr/local/bin/envoy
+        - --serviceCluster
+        - ingress-kong
+        - --drainDuration
+        - 45s
+        - --parentShutdownDuration
+        - 1m0s
+        - --discoveryAddress
+        - istio-pilot.istio-system:8080
+        - --discoveryRefreshDelay
+        - 1s
+        - --zipkinAddress
+        - zipkin.istio-system:9411
+        - --connectTimeout
+        - 10s
+        - --statsdUdpAddress
+        - istio-mixer.istio-system:9125
+        - --proxyAdminPort
+        - "15000"
+        - --controlPlaneAuthPolicy
+        - NONE
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: INSTANCE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        image: docker.io/istio/proxy:0.7.1
+        imagePullPolicy: IfNotPresent
+        name: istio-proxy
+        resources: {}
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsUser: 1337
+        volumeMounts:
+        - mountPath: /etc/istio/proxy
+          name: istio-envoy
+        - mountPath: /etc/certs/
+          name: istio-certs
+          readOnly: true
+status: {}
 ---
 
 apiVersion: v1
@@ -413,33 +510,36 @@ metadata:
   name: kong-proxy
   namespace: kong
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-  - name: kong-proxy
+  - name: http
     port: 80
     targetPort: 8000
     protocol: TCP
-  - name: kong-proxy-ssl
+  - name: https
     port: 443
     targetPort: 8443
     protocol: TCP
   selector:
     app: kong
 
-
 ---
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: kong
   namespace: kong
 spec:
+  strategy: {}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/status: '{"version":"43466efda2266e066fb5ad36f2d1658de02fc9411f6db00ccff561300a2a3c78","initContainers":["istio-init","enable-core-dump"],"containers":["istio-proxy"],"volumes":["istio-envoy","istio-certs"]}'
+      creationTimestamp: null
       labels:
         name: kong
         app: kong
+        version: 0.13.1
     spec:
       containers:
       - name: kong-proxy
@@ -450,11 +550,11 @@ spec:
           - name: KONG_PG_HOST
             value: postgres
           - name: KONG_PROXY_ACCESS_LOG
-            value: "/dev/stdout"
+            value: /dev/stdout
           - name: KONG_PROXY_ERROR_LOG
-            value: "/dev/stderr"
+            value: /dev/stderr
           - name: KONG_ADMIN_LISTEN
-            value: 'off'
+            value: "off"
         ports:
         - name: proxy
           containerPort: 8000
@@ -462,5 +562,94 @@ spec:
         - name: proxy-ssl
           containerPort: 8443
           protocol: TCP
-
+        resources: {}
+      - name: istio-proxy
+        image: docker.io/istio/proxy:0.7.1
+        args:
+        - proxy
+        - sidecar
+        - --configPath
+        - /etc/istio/proxy
+        - --binaryPath
+        - /usr/local/bin/envoy
+        - --serviceCluster
+        - kong
+        - --drainDuration
+        - 45s
+        - --parentShutdownDuration
+        - 1m0s
+        - --discoveryAddress
+        - istio-pilot.istio-system:8080
+        - --discoveryRefreshDelay
+        - 1s
+        - --zipkinAddress
+        - zipkin.istio-system:9411
+        - --connectTimeout
+        - 10s
+        - --statsdUdpAddress
+        - istio-mixer.istio-system:9125
+        - --proxyAdminPort
+        - "15000"
+        - --controlPlaneAuthPolicy
+        - NONE
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: INSTANCE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        imagePullPolicy: IfNotPresent
+        resources: {}
+        securityContext:
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsUser: 1337
+        volumeMounts:
+        - mountPath: /etc/istio/proxy
+          name: istio-envoy
+        - mountPath: /etc/certs/
+          name: istio-certs
+          readOnly: true
+      initContainers:
+      - args:
+        - -p
+        - "15001"
+        - -u
+        - "1337"
+        image: docker.io/istio/proxy_init:0.7.1
+        imagePullPolicy: IfNotPresent
+        name: istio-init
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+      - args:
+        - -c
+        - sysctl -w kernel.core_pattern=/etc/istio/proxy/core.%e.%p.%t && ulimit -c
+          unlimited
+        command:
+        - /bin/sh
+        image: alpine
+        imagePullPolicy: IfNotPresent
+        name: enable-core-dump
+        resources: {}
+        securityContext:
+          privileged: true
+      volumes:
+      - emptyDir:
+          medium: Memory
+        name: istio-envoy
+      - name: istio-certs
+        secret:
+          optional: true
+          secretName: istio.default
+status: {}
 ---
